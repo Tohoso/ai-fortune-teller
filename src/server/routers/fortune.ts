@@ -88,7 +88,7 @@ export const fortuneRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({
       fortuneTypeId: z.string().uuid(),
-      inputData: z.record(z.any())
+      inputData: z.record(z.union([z.string(), z.number(), z.boolean()]))
     }))
     .mutation(async ({ ctx, input }) => {
       const { fortuneTypeId, inputData } = input

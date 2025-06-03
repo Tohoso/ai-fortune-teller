@@ -91,12 +91,12 @@ export function FortuneForm({ fortuneType }: FortuneFormProps) {
     defaultValues: {
       name: "",
       birthdate: "",
-      gender: undefined,
+      gender: undefined as "male" | "female" | "other" | undefined,
       consultation: "",
       birthtime: "",
       birthplace: "",
-      question_type: undefined,
-    } as any,
+      question_type: undefined as "love" | "work" | "money" | "health" | "general" | undefined,
+    },
   })
 
   const createFortune = api.fortune.create.useMutation({
