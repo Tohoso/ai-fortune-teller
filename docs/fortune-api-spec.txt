@@ -1,0 +1,1176 @@
+openapi: 3.0.0
+info:
+  title: 占い自動鑑定システム API
+  description: |
+    占い自動鑑定システムのREST API仕様書
+    
+    ## 認証
+    - Bearer認証（JWT）を使用
+    - ログインエンドポイント以外は認証が必要
+    
+    ## エラーレスポンス
+    すべてのエラーは以下の形式で返却されます：
+    ```json
+    {
+      "error": {
+        "code": "ERROR_CODE",
+        "message": "エラーメッセージ",
+        "details": {}
+      }
+    }
+    ```
+  version: 1.0.0
+  contact:
+    name: API サポート
+    email: api-support@fortune-telling.com
+
+servers:
+  - url: https://api.fortune-telling.com/v1
+    description: 本番環境
+  - url: http://localhost:3000/api/v1
+    description: 開発環境
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: auth
+    description: 認証関連
+  - name: users
+    description: ユーザー管理
+  - name: fortunes
+    description: 占い機能
+  - name: payments
+    description: 決済・クレジット管理
+  - name: admin
+    description: 管理者機能
+
+paths:
+  # 認証関連
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: ユーザー登録
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  example: 山田太郎
+                  minLength: 1
+                  maxLength: 100
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: Password123!
+      responses:
+        '201':
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: メールアドレス重複
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: ログイン
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: ログアウト
+      responses:
+        '200':
+          description: ログアウト成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: ログアウトしました
+
+  /auth/reset-password:
+    post:
+      tags:
+        - auth
+      summary: パスワードリセット依頼
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: リセットメール送信
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: パスワードリセットメールを送信しました
+
+  # ユーザー管理
+  /users/me:
+    get:
+      tags:
+        - users
+      summary: 現在のユーザー情報取得
+      responses:
+        '200':
+          description: ユーザー情報
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    
+    patch:
+      tags:
+        - users
+      summary: ユーザー情報更新
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # 占い機能
+  /fortunes/types:
+    get:
+      tags:
+        - fortunes
+      summary: 占い種別一覧取得
+      responses:
+        '200':
+          description: 占い種別一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fortuneTypes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FortuneType'
+
+  /fortunes:
+    post:
+      tags:
+        - fortunes
+      summary: 占い申込
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fortuneTypeId
+                - inputData
+              properties:
+                fortuneTypeId:
+                  type: string
+                  format: uuid
+                  example: 123e4567-e89b-12d3-a456-426614174000
+                inputData:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: 山田太郎
+                    birthdate:
+                      type: string
+                      format: date
+                      example: 1990-01-01
+                    birthtime:
+                      type: string
+                      pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+                      example: "10:30"
+                    birthplace:
+                      type: string
+                      example: 東京都
+                    gender:
+                      type: string
+                      enum: [male, female, other]
+                    consultation:
+                      type: string
+                      maxLength: 500
+                      example: 仕事運について相談したいです
+      responses:
+        '201':
+          description: 申込成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FortuneRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '402':
+          description: クレジット不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - fortunes
+      summary: 占い履歴取得
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed]
+          description: ステータスフィルター
+        - in: query
+          name: fortuneTypeId
+          schema:
+            type: string
+            format: uuid
+          description: 占い種別フィルター
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: 占い履歴
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FortuneRequest'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /fortunes/{id}:
+    get:
+      tags:
+        - fortunes
+      summary: 占い申込詳細取得
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 占い申込詳細
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FortuneRequestDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /fortunes/{id}/result:
+    get:
+      tags:
+        - fortunes
+      summary: 鑑定結果取得
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 鑑定結果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FortuneResult'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /fortunes/{id}/pdf:
+    get:
+      tags:
+        - fortunes
+      summary: 鑑定結果PDF取得
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: PDFファイル
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # 決済・クレジット管理
+  /payments/credits:
+    get:
+      tags:
+        - payments
+      summary: クレジット残高取得
+      responses:
+        '200':
+          description: クレジット情報
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credits:
+                    type: integer
+                    example: 3
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CreditTransaction'
+
+  /payments/checkout:
+    post:
+      tags:
+        - payments
+      summary: Stripe Checkout セッション作成
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - credits
+              properties:
+                credits:
+                  type: integer
+                  minimum: 1
+                  example: 5
+      responses:
+        '200':
+          description: Checkout セッション
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    example: cs_test_a1b2c3d4e5f6g7h8i9j0
+                  url:
+                    type: string
+                    example: https://checkout.stripe.com/pay/cs_test_a1b2c3d4e5f6g7h8i9j0
+
+  /payments/history:
+    get:
+      tags:
+        - payments
+      summary: 購入履歴取得
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: 購入履歴
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PaymentHistory'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /webhooks/stripe:
+    post:
+      tags:
+        - payments
+      summary: Stripe Webhook
+      security: []
+      parameters:
+        - in: header
+          name: stripe-signature
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook処理成功
+
+  # 管理者機能
+  /admin/login:
+    post:
+      tags:
+        - admin
+      summary: 管理者ログイン
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  admin:
+                    $ref: '#/components/schemas/Admin'
+                  token:
+                    type: string
+
+  /admin/dashboard:
+    get:
+      tags:
+        - admin
+      summary: 管理者ダッシュボード情報取得
+      security:
+        - adminAuth: []
+      responses:
+        '200':
+          description: ダッシュボード情報
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    type: object
+                    properties:
+                      totalUsers:
+                        type: integer
+                        example: 1234
+                      todayRevenue:
+                        type: integer
+                        example: 45600
+                      pendingFortunes:
+                        type: integer
+                        example: 8
+                      monthlyFortunes:
+                        type: integer
+                        example: 856
+
+  /admin/fortunes:
+    get:
+      tags:
+        - admin
+      summary: 鑑定管理一覧取得
+      security:
+        - adminAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, ai_generated, editing, approved, published]
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: ユーザー名検索
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 鑑定一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fortunes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminFortuneItem'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /admin/fortunes/{id}:
+    get:
+      tags:
+        - admin
+      summary: 鑑定詳細取得（管理者用）
+      security:
+        - adminAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 鑑定詳細
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminFortuneDetail'
+
+    patch:
+      tags:
+        - admin
+      summary: 鑑定結果編集
+      security:
+        - adminAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                editedResult:
+                  type: string
+                  description: 編集後の鑑定文
+                status:
+                  type: string
+                  enum: [editing, approved]
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminFortuneDetail'
+
+  /admin/fortunes/{id}/approve:
+    post:
+      tags:
+        - admin
+      summary: 鑑定結果承認
+      security:
+        - adminAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 承認成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 鑑定結果を承認しました
+
+  /admin/users:
+    get:
+      tags:
+        - admin
+      summary: ユーザー一覧取得
+      security:
+        - adminAuth: []
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: 名前またはメールで検索
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: ユーザー一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminUserItem'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /admin/users/{id}:
+    get:
+      tags:
+        - admin
+      summary: ユーザー詳細取得
+      security:
+        - adminAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: ユーザー詳細
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetail'
+
+    patch:
+      tags:
+        - admin
+      summary: ユーザー情報更新
+      security:
+        - adminAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                credits:
+                  type: integer
+                  minimum: 0
+                  description: クレジット手動付与
+                isActive:
+                  type: boolean
+                  description: アカウント有効/無効
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserDetail'
+
+  /admin/reports/revenue:
+    get:
+      tags:
+        - admin
+      summary: 売上レポート取得
+      security:
+        - adminAuth: []
+      parameters:
+        - in: query
+          name: period
+          required: true
+          schema:
+            type: string
+            enum: [daily, weekly, monthly, yearly]
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 売上レポート
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      totalRevenue:
+                        type: integer
+                        example: 1234567
+                      totalTransactions:
+                        type: integer
+                        example: 2469
+                      averageTransaction:
+                        type: number
+                        example: 500.5
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        revenue:
+                          type: integer
+                        transactions:
+                          type: integer
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    
+    adminAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 管理者用トークン
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        credits:
+          type: integer
+        emailVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Admin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [super_admin, admin]
+        createdAt:
+          type: string
+          format: date-time
+
+    FortuneType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: 九星気学
+        description:
+          type: string
+          example: 生年月日から導き出す東洋の占術
+        requiredCredits:
+          type: integer
+          example: 1
+        isActive:
+          type: boolean
+
+    FortuneRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        fortuneTypeId:
+          type: string
+          format: uuid
+        fortuneType:
+          $ref: '#/components/schemas/FortuneType'
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        createdAt:
+          type: string
+          format: date-time
+
+    FortuneRequestDetail:
+      allOf:
+        - $ref: '#/components/schemas/FortuneRequest'
+        - type: object
+          properties:
+            inputData:
+              type: object
+            result:
+              $ref: '#/components/schemas/FortuneResult'
+
+    FortuneResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requestId:
+          type: string
+          format: uuid
+        finalContent:
+          type: string
+          description: 最終的な鑑定文
+        pdfUrl:
+          type: string
+          format: uri
+        publishedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    CreditTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+          description: 正の値は追加、負の値は使用
+        type:
+          type: string
+          enum: [purchase, usage, bonus, refund]
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    PaymentHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        stripePaymentId:
+          type: string
+        amountJpy:
+          type: integer
+        creditsPurchased:
+          type: integer
+        status:
+          type: string
+          enum: [succeeded, failed, refunded]
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminFortuneItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+            email:
+              type: string
+              format: email
+        fortuneType:
+          type: string
+        status:
+          type: string
+          enum: [pending, ai_generated, editing, approved, published]
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminFortuneDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        request:
+          $ref: '#/components/schemas/FortuneRequestDetail'
+        aiResult:
+          type: object
+          properties:
+            prompt:
+              type: string
+            rawResult:
+              type: string
+            editedResult:
+              type: string
+            editor:
+              $ref: '#/components/schemas/Admin'
+            approvedAt:
+              type: string
+              format: date-time
+
+    AdminUserItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        credits:
+          type: integer
+        totalFortunes:
+          type: integer
+        totalSpent:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminUserDetail:
+      allOf:
+        - $ref: '#/components/schemas/AdminUserItem'
+        - type: object
+          properties:
+            recentFortunes:
+              type: array
+              items:
+                $ref: '#/components/schemas/FortuneRequest'
+            creditTransactions:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreditTransaction'
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: 入力値が不正です
+            details:
+              type: object
+              additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: 不正なリクエスト
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: 認証エラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: アクセス拒否
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: リソースが見つからない
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalServerError:
+      description: サーバーエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

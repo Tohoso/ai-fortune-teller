@@ -1,0 +1,124 @@
+{
+  "recommendations": [
+    // ========================================
+    // 必須拡張機能（MUST HAVE）
+    // ========================================
+    
+    // TypeScript/JavaScript開発
+    "dbaeumer.vscode-eslint",              // ESLint: コード品質チェック
+    "esbenp.prettier-vscode",               // Prettier: コードフォーマッター
+    "ms-vscode.vscode-typescript-next",     // TypeScript言語サポート（最新版）
+    
+    // React/Next.js開発
+    "dsznajder.es7-react-js-snippets",      // React スニペット集
+    "formulahendry.auto-rename-tag",        // HTMLタグの自動リネーム
+    "burkeholland.simple-react-snippets",   // シンプルなReactスニペット
+    
+    // Tailwind CSS
+    "bradlc.vscode-tailwindcss",            // Tailwind CSS IntelliSense
+    
+    // Prisma
+    "prisma.prisma",                        // Prisma言語サポート
+    
+    // Git
+    "eamodio.gitlens",                      // GitLens: Git履歴の可視化
+    "mhutchie.git-graph",                   // Git Graph: ビジュアルなGit履歴
+    
+    // ========================================
+    // 強く推奨する拡張機能（HIGHLY RECOMMENDED）
+    // ========================================
+    
+    // コード品質向上
+    "streetsidesoftware.code-spell-checker", // スペルチェッカー
+    "usernamehw.errorlens",                  // エラー・警告をインライン表示
+    "yoavbls.pretty-ts-errors",              // TypeScriptエラーを見やすく表示
+    "aaron-bond.better-comments",            // コメントの色分け・強調表示
+    
+    // 開発効率化
+    "christian-kohler.path-intellisense",    // パス入力補完
+    "naumovs.color-highlight",               // カラーコードの可視化
+    "wix.vscode-import-cost",                // インポートのサイズ表示
+    "styled-components.vscode-styled-components", // styled-components対応
+    
+    // デバッグ・テスト
+    "ms-vscode.vscode-js-profile-flame",     // JavaScriptプロファイラー
+    "orta.vscode-jest",                      // Jest統合
+    "ms-playwright.playwright",              // Playwright統合
+    
+    // AI補助ツール
+    "github.copilot",                        // GitHub Copilot
+    "github.copilot-chat",                   // GitHub Copilot Chat
+    
+    // ========================================
+    // 便利な拡張機能（NICE TO HAVE）
+    // ========================================
+    
+    // ファイル・プロジェクト管理
+    "sleistner.vscode-fileutils",            // ファイル操作ユーティリティ
+    "alefragnani.project-manager",           // プロジェクト管理
+    "gruntfuggly.todo-tree",                 // TODOコメントの可視化
+    
+    // 見た目・テーマ
+    "pkief.material-icon-theme",             // Material Icon Theme
+    "github.github-vscode-theme",            // GitHub Theme
+    "dracula-theme.theme-dracula",           // Dracula Theme
+    
+    // Markdown
+    "yzhang.markdown-all-in-one",            // Markdown統合ツール
+    "davidanson.vscode-markdownlint",        // Markdownリンター
+    "bierner.markdown-preview-github-styles", // GitHub風Markdownプレビュー
+    
+    // API開発
+    "rangav.vscode-thunder-client",          // Thunder Client: REST APIクライアント
+    "42crunch.vscode-openapi",               // OpenAPI (Swagger) エディタ
+    
+    // Docker（必要に応じて）
+    "ms-azuretools.vscode-docker",           // Docker統合
+    "ms-vscode-remote.remote-containers",    // Dev Containers
+    
+    // その他の便利ツール
+    "wayou.vscode-todo-highlight",           // TODOハイライト
+    "vincaslt.highlight-matching-tag",       // マッチするHTMLタグをハイライト
+    "pranaygp.vscode-css-peek",              // CSSクラス定義へのジャンプ
+    "meganrogge.template-string-converter",   // 文字列をテンプレートリテラルに変換
+    "quicktype.quicktype",                   // JSONからTypeScript型を生成
+    
+    // ========================================
+    // 日本語サポート
+    // ========================================
+    
+    "ms-ceintl.vscode-language-pack-ja",     // 日本語言語パック
+    "streetsidesoftware.code-spell-checker-japanese", // 日本語スペルチェッカー
+    
+    // ========================================
+    // 特定技術用（オプション）
+    // ========================================
+    
+    // GraphQL（将来的に使用する場合）
+    "graphql.vscode-graphql",                // GraphQL言語サポート
+    "graphql.vscode-graphql-syntax",         // GraphQLシンタックスハイライト
+    
+    // データベース
+    "mtxr.sqltools",                         // SQLTools
+    "mtxr.sqltools-driver-pg",               // PostgreSQLドライバ
+    
+    // 環境変数
+    "mikestead.dotenv",                      // .env ファイルサポート
+    "irongeek.vscode-env",                   // .env ファイル補完
+    
+    // パフォーマンス分析
+    "kisstkondoros.vscode-codemetrics",      // コード複雑度の可視化
+    "wix.vscode-import-cost"                 // インポートコスト表示
+  ],
+  
+  // ========================================
+  // 拡張機能の設定
+  // ========================================
+  "unwantedRecommendations": [
+    // 競合する可能性のある拡張機能
+    "hookyqr.beautify",                      // Prettierと競合
+    "dbaeumer.jshint",                       // ESLintと競合
+    "ms-vscode.vscode-typescript-tslint-plugin", // ESLintで代替
+    "editorconfig.editorconfig"              // Prettierで代替
+  ]
+}

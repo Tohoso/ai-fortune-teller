@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>占い自動鑑定システム 画面設計書</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+            background-color: #f5f7fa;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .toc {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .toc h2 {
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+        
+        .toc ul {
+            list-style: none;
+        }
+        
+        .toc li {
+            margin: 10px 0;
+        }
+        
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        .screen-section {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .screen-title {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .screen-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-item {
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+        
+        .wireframe {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            min-height: 400px;
+            position: relative;
+        }
+        
+        .wireframe-mobile {
+            max-width: 375px;
+            margin: 0 auto;
+        }
+        
+        .wireframe-element {
+            background: white;
+            border: 2px solid #cbd5e0;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .wireframe-header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .wireframe-button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            display: inline-block;
+            margin: 10px;
+        }
+        
+        .wireframe-input {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 10px;
+            border-radius: 4px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .wireframe-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .wireframe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .specifications {
+            margin-top: 30px;
+        }
+        
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .spec-table th,
+        .spec-table td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .spec-table th {
+            background: #f7fafc;
+            font-weight: bold;
+            color: #4a5568;
+        }
+        
+        .ui-flow {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+        
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .flow-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .responsive-note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .error-state {
+            background: #fee;
+            border: 1px solid #fcc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            color: #c53030;
+        }
+        
+        .success-state {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            color: #166534;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>占い自動鑑定システム 画面設計書</h1>
+            <p>全画面のワイヤーフレームと詳細仕様</p>
+        </div>
+        
+        <div class="toc">
+            <h2>目次</h2>
+            <ul>
+                <li><a href="#login">1. ログイン画面</a></li>
+                <li><a href="#register">2. 新規登録画面</a></li>
+                <li><a href="#dashboard">3. ダッシュボード</a></li>
+                <li><a href="#fortune-select">4. 占い選択画面</a></li>
+                <li><a href="#fortune-form">5. 占い申込フォーム</a></li>
+                <li><a href="#payment">6. クレジット購入画面</a></li>
+                <li><a href="#history">7. 鑑定履歴画面</a></li>
+                <li><a href="#result">8. 鑑定結果画面</a></li>
+                <li><a href="#admin-dashboard">9. 管理者ダッシュボード</a></li>
+                <li><a href="#admin-fortune">10. 鑑定結果管理画面</a></li>
+            </ul>
+        </div>
+
+        <!-- 1. ログイン画面 -->
+        <div id="login" class="screen-section">
+            <h2 class="screen-title">1. ログイン画面</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/login</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>不要（ゲストアクセス可）</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">レスポンシブ</div>
+                    <div>モバイル優先設計</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header">
+                    <h3 style="text-align: center; margin: 0;">占い自動鑑定システム</h3>
+                </div>
+                
+                <div style="max-width: 400px; margin: 40px auto;">
+                    <div class="wireframe-card">
+                        <h3 style="text-align: center; margin-bottom: 30px;">ログイン</h3>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 12px;">メールアドレス</div>
+                            <div class="wireframe-input">example@email.com</div>
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 12px;">パスワード</div>
+                            <div class="wireframe-input">••••••••</div>
+                        </div>
+                        
+                        <div style="text-align: right; margin: 10px 0;">
+                            <a href="#" style="color: #667eea; font-size: 14px;">パスワードを忘れた方</a>
+                        </div>
+                        
+                        <div class="wireframe-button" style="width: 100%; text-align: center;">
+                            ログイン
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px; color: #718096;">
+                            アカウントをお持ちでない方は
+                            <a href="#" style="color: #667eea;">新規登録</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="specifications">
+                <h3>画面仕様</h3>
+                <table class="spec-table">
+                    <tr>
+                        <th>項目</th>
+                        <th>仕様</th>
+                        <th>バリデーション</th>
+                    </tr>
+                    <tr>
+                        <td>メールアドレス</td>
+                        <td>input[type="email"]、最大255文字</td>
+                        <td>必須、メール形式</td>
+                    </tr>
+                    <tr>
+                        <td>パスワード</td>
+                        <td>input[type="password"]、最大100文字</td>
+                        <td>必須、8文字以上</td>
+                    </tr>
+                    <tr>
+                        <td>ログインボタン</td>
+                        <td>フォーム送信、ローディング表示</td>
+                        <td>-</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="error-state">
+                <strong>エラー表示例:</strong> メールアドレスまたはパスワードが正しくありません
+            </div>
+        </div>
+
+        <!-- 2. 新規登録画面 -->
+        <div id="register" class="screen-section">
+            <h2 class="screen-title">2. 新規登録画面</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/register</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>不要</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">特記事項</div>
+                    <div>登録完了で3クレジット付与</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header">
+                    <h3 style="text-align: center; margin: 0;">占い自動鑑定システム</h3>
+                </div>
+                
+                <div style="max-width: 400px; margin: 40px auto;">
+                    <div class="wireframe-card">
+                        <h3 style="text-align: center; margin-bottom: 30px;">新規登録</h3>
+                        
+                        <div class="success-state">
+                            🎁 今なら登録で3クレジットプレゼント！
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 12px;">お名前</div>
+                            <div class="wireframe-input">山田太郎</div>
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 12px;">メールアドレス</div>
+                            <div class="wireframe-input">example@email.com</div>
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 12px;">パスワード</div>
+                            <div class="wireframe-input">••••••••</div>
+                            <div style="font-size: 12px; color: #718096; text-align: left;">
+                                ※8文字以上、英数字を含む
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 12px;">パスワード（確認）</div>
+                            <div class="wireframe-input">••••••••</div>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <label style="display: flex; align-items: center; font-size: 14px;">
+                                <input type="checkbox" style="margin-right: 8px;">
+                                <span>利用規約とプライバシーポリシーに同意する</span>
+                            </label>
+                        </div>
+                        
+                        <div class="wireframe-button" style="width: 100%; text-align: center;">
+                            登録する
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. ダッシュボード -->
+        <div id="dashboard" class="screen-section">
+            <h2 class="screen-title">3. ダッシュボード</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/dashboard</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>必要（ログイン必須）</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">主要機能</div>
+                    <div>占い申込、履歴確認、クレジット管理</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0;">占い自動鑑定システム</h3>
+                    <div style="display: flex; gap: 20px; align-items: center;">
+                        <span>💰 クレジット: 3</span>
+                        <span>👤 山田太郎</span>
+                        <button style="background: white; color: #667eea; padding: 5px 15px; border-radius: 4px;">ログアウト</button>
+                    </div>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <h2 style="margin-bottom: 20px;">こんにちは、山田太郎さん</h2>
+                    
+                    <div class="wireframe-grid">
+                        <div class="wireframe-card">
+                            <h3 style="color: #667eea; margin-bottom: 10px;">🔮 新しい占いを始める</h3>
+                            <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">
+                                AI占い師があなたの運勢を鑑定します
+                            </p>
+                            <div class="wireframe-button">占いを選ぶ</div>
+                        </div>
+                        
+                        <div class="wireframe-card">
+                            <h3 style="color: #667eea; margin-bottom: 10px;">📋 鑑定履歴</h3>
+                            <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">
+                                過去の鑑定結果を確認できます
+                            </p>
+                            <div class="wireframe-button">履歴を見る</div>
+                        </div>
+                        
+                        <div class="wireframe-card">
+                            <h3 style="color: #667eea; margin-bottom: 10px;">💳 クレジット購入</h3>
+                            <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">
+                                現在の残高: 3クレジット
+                            </p>
+                            <div class="wireframe-button">購入する</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 40px;">
+                        <h3 style="margin-bottom: 20px;">最近の鑑定</h3>
+                        <div class="wireframe-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="color: #2d3748;">九星気学による運勢鑑定</h4>
+                                    <p style="color: #718096; font-size: 14px;">2025年6月1日 申込</p>
+                                </div>
+                                <div>
+                                    <span style="background: #48bb78; color: white; padding: 4px 12px; border-radius: 4px; font-size: 14px;">
+                                        完成
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 占い選択画面 -->
+        <div id="fortune-select" class="screen-section">
+            <h2 class="screen-title">4. 占い選択画面</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/fortune</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>必要</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">機能</div>
+                    <div>占い種別の選択</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0;">占いを選ぶ</h3>
+                    <span>💰 クレジット: 3</span>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <h2 style="text-align: center; margin-bottom: 30px;">どの占いで鑑定しますか？</h2>
+                    
+                    <div class="wireframe-grid">
+                        <div class="wireframe-card" style="cursor: pointer; transition: all 0.3s;">
+                            <div style="text-align: center; font-size: 48px; margin-bottom: 15px;">⭐</div>
+                            <h3 style="text-align: center; margin-bottom: 10px;">九星気学</h3>
+                            <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">
+                                生年月日から導き出す東洋の占術。運勢の流れと開運法をお伝えします。
+                            </p>
+                            <div style="text-align: center;">
+                                <span style="color: #667eea; font-weight: bold;">必要クレジット: 1</span>
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-card" style="cursor: pointer;">
+                            <div style="text-align: center; font-size: 48px; margin-bottom: 15px;">🎴</div>
+                            <h3 style="text-align: center; margin-bottom: 10px;">タロット占い</h3>
+                            <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">
+                                78枚のカードが示す神秘のメッセージ。具体的な悩みにお答えします。
+                            </p>
+                            <div style="text-align: center;">
+                                <span style="color: #667eea; font-weight: bold;">必要クレジット: 1</span>
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-card" style="cursor: pointer;">
+                            <div style="text-align: center; font-size: 48px; margin-bottom: 15px;">🌟</div>
+                            <h3 style="text-align: center; margin-bottom: 10px;">西洋占星術</h3>
+                            <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">
+                                惑星の配置から読み解く運命。詳細な性格分析と未来予測を行います。
+                            </p>
+                            <div style="text-align: center;">
+                                <span style="color: #667eea; font-weight: bold;">必要クレジット: 2</span>
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-card" style="cursor: pointer;">
+                            <div style="text-align: center; font-size: 48px; margin-bottom: 15px;">🏮</div>
+                            <h3 style="text-align: center; margin-bottom: 10px;">四柱推命</h3>
+                            <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">
+                                生まれた年月日時から運命を精密に分析。人生の指針をお示しします。
+                            </p>
+                            <div style="text-align: center;">
+                                <span style="color: #667eea; font-weight: bold;">必要クレジット: 2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ui-flow">
+                <h3>画面遷移フロー</h3>
+                <div class="flow-step">
+                    <div class="flow-number">1</div>
+                    <div>占い種別カードをクリック</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-number">2</div>
+                    <div>クレジット残高確認</div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-number">3</div>
+                    <div>不足の場合は購入画面へ、十分な場合は申込フォームへ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 占い申込フォーム -->
+        <div id="fortune-form" class="screen-section">
+            <h2 class="screen-title">5. 占い申込フォーム（九星気学の例）</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/fortune/kyusei</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>必要</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">動的要素</div>
+                    <div>占い種別により入力項目が変化</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header">
+                    <h3 style="margin: 0;">九星気学 占い申込</h3>
+                </div>
+                
+                <div style="max-width: 600px; margin: 20px auto;">
+                    <div class="wireframe-card">
+                        <h3 style="margin-bottom: 20px;">鑑定に必要な情報を入力してください</h3>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 14px; font-weight: bold;">
+                                お名前 <span style="color: #e53e3e;">*</span>
+                            </div>
+                            <div class="wireframe-input">山田太郎</div>
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 14px; font-weight: bold;">
+                                生年月日 <span style="color: #e53e3e;">*</span>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <select class="wireframe-input" style="flex: 1;">
+                                    <option>1990年</option>
+                                </select>
+                                <select class="wireframe-input" style="flex: 1;">
+                                    <option>1月</option>
+                                </select>
+                                <select class="wireframe-input" style="flex: 1;">
+                                    <option>1日</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 14px; font-weight: bold;">
+                                性別 <span style="color: #e53e3e;">*</span>
+                            </div>
+                            <div style="display: flex; gap: 20px; margin-top: 10px;">
+                                <label style="display: flex; align-items: center;">
+                                    <input type="radio" name="gender" style="margin-right: 8px;">
+                                    <span>男性</span>
+                                </label>
+                                <label style="display: flex; align-items: center;">
+                                    <input type="radio" name="gender" style="margin-right: 8px;">
+                                    <span>女性</span>
+                                </label>
+                                <label style="display: flex; align-items: center;">
+                                    <input type="radio" name="gender" style="margin-right: 8px;">
+                                    <span>その他</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 14px; font-weight: bold;">
+                                出生時刻（わかる場合）
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <select class="wireframe-input" style="flex: 1;">
+                                    <option>10時</option>
+                                </select>
+                                <select class="wireframe-input" style="flex: 1;">
+                                    <option>30分</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 14px; font-weight: bold;">
+                                出生地（都道府県）
+                            </div>
+                            <select class="wireframe-input">
+                                <option>東京都</option>
+                            </select>
+                        </div>
+                        
+                        <div class="wireframe-element">
+                            <div style="text-align: left; color: #4a5568; font-size: 14px; font-weight: bold;">
+                                ご相談内容 <span style="color: #e53e3e;">*</span>
+                                <span style="font-weight: normal; color: #718096;">（500文字以内）</span>
+                            </div>
+                            <textarea class="wireframe-input" rows="5" style="resize: vertical;">
+仕事運について相談したいです。転職を考えているのですが、時期的にどうでしょうか？
+                            </textarea>
+                            <div style="text-align: right; color: #718096; font-size: 12px;">
+                                45 / 500文字
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: bold;">必要クレジット</span>
+                                <span style="font-size: 24px; color: #667eea; font-weight: bold;">1</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                                <span>現在の残高</span>
+                                <span>3クレジット</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button style="padding: 12px 24px; border: 2px solid #e2e8f0; border-radius: 6px; background: white;">
+                                戻る
+                            </button>
+                            <div class="wireframe-button">
+                                占いを申し込む
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="responsive-note">
+                <strong>レスポンシブ対応:</strong> モバイル表示時は縦並びレイアウトに自動調整されます。
+                日付選択はネイティブのdate pickerも選択可能です。
+            </div>
+        </div>
+
+        <!-- 6. クレジット購入画面 -->
+        <div id="payment" class="screen-section">
+            <h2 class="screen-title">6. クレジット購入画面</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/payment</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>必要</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">外部連携</div>
+                    <div>Stripe Checkout</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header">
+                    <h3 style="margin: 0;">クレジット購入</h3>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2>クレジットを購入する</h2>
+                        <p style="color: #718096;">現在の残高: 0クレジット</p>
+                    </div>
+                    
+                    <div class="wireframe-grid" style="max-width: 800px; margin: 0 auto;">
+                        <div class="wireframe-card" style="border: 2px solid #667eea; cursor: pointer;">
+                            <div style="text-align: center;">
+                                <h3 style="font-size: 24px; margin-bottom: 10px;">1クレジット</h3>
+                                <div style="font-size: 36px; color: #667eea; font-weight: bold; margin: 20px 0;">
+                                    ¥500
+                                </div>
+                                <p style="color: #718096; font-size: 14px;">
+                                    お試し購入
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-card" style="cursor: pointer; position: relative;">
+                            <div style="position: absolute; top: -10px; right: 20px; background: #f56565; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px;">
+                                人気
+                            </div>
+                            <div style="text-align: center;">
+                                <h3 style="font-size: 24px; margin-bottom: 10px;">5クレジット</h3>
+                                <div style="font-size: 36px; color: #667eea; font-weight: bold; margin: 20px 0;">
+                                    ¥2,400
+                                </div>
+                                <p style="color: #48bb78; font-size: 14px; font-weight: bold;">
+                                    100円お得！
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-card" style="cursor: pointer;">
+                            <div style="text-align: center;">
+                                <h3 style="font-size: 24px; margin-bottom: 10px;">10クレジット</h3>
+                                <div style="font-size: 36px; color: #667eea; font-weight: bold; margin: 20px 0;">
+                                    ¥4,500
+                                </div>
+                                <p style="color: #48bb78; font-size: 14px; font-weight: bold;">
+                                    500円お得！
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="max-width: 600px; margin: 40px auto;">
+                        <div style="background: #f7fafc; padding: 20px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 15px;">安心・安全な決済</h4>
+                            <ul style="color: #718096; font-size: 14px; line-height: 1.8;">
+                                <li>✓ SSL暗号化通信で安全</li>
+                                <li>✓ クレジットカード情報は保存されません</li>
+                                <li>✓ Stripeの安全な決済システムを使用</li>
+                                <li>✓ VISA, Mastercard, AMEX対応</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 鑑定履歴画面 -->
+        <div id="history" class="screen-section">
+            <h2 class="screen-title">7. 鑑定履歴画面</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/history</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>必要</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">機能</div>
+                    <div>過去の鑑定一覧、絞り込み、ページネーション</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header">
+                    <h3 style="margin: 0;">鑑定履歴</h3>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>過去の鑑定一覧</h2>
+                        <select class="wireframe-input" style="width: 200px;">
+                            <option>すべての占い</option>
+                            <option>九星気学</option>
+                            <option>タロット占い</option>
+                            <option>西洋占星術</option>
+                            <option>四柱推命</option>
+                        </select>
+                    </div>
+                    
+                    <div style="space-y: 4;">
+                        <div class="wireframe-card">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h3 style="color: #2d3748; margin-bottom: 8px;">九星気学による総合鑑定</h3>
+                                    <p style="color: #718096; font-size: 14px; margin-bottom: 5px;">
+                                        申込日: 2025年6月1日 14:30
+                                    </p>
+                                    <p style="color: #718096; font-size: 14px;">
+                                        相談内容: 仕事運について...
+                                    </p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="background: #48bb78; color: white; padding: 4px 12px; border-radius: 4px; font-size: 14px;">
+                                        完成
+                                    </span>
+                                    <div style="margin-top: 10px;">
+                                        <button class="wireframe-button" style="font-size: 14px; padding: 8px 16px;">
+                                            結果を見る
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="wireframe-card">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h3 style="color: #2d3748; margin-bottom: 8px;">タロット占い - 恋愛運</h3>
+                                    <p style="color: #718096; font-size: 14px; margin-bottom: 5px;">
+                                        申込日: 2025年5月28日 10:15
+                                    </p>
+                                    <p style="color: #718096; font-size: 14px;">
+                                        相談内容: 恋愛について...
+                                    </p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 4px; font-size: 14px;">
+                                        作成中
+                                    </span>
+                                    <div style="margin-top: 10px; color: #718096; font-size: 12px;">
+                                        完成予定: 24時間以内
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; gap: 10px; margin-top: 30px;">
+                        <button style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                            ← 前へ
+                        </button>
+                        <button style="padding: 8px 12px; background: #667eea; color: white; border-radius: 4px;">
+                            1
+                        </button>
+                        <button style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                            2
+                        </button>
+                        <button style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                            次へ →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. 鑑定結果画面 -->
+        <div id="result" class="screen-section">
+            <h2 class="screen-title">8. 鑑定結果画面</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/result/[id]</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>必要（結果の所有者のみ）</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">主要機能</div>
+                    <div>鑑定結果表示、PDF出力</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header">
+                    <h3 style="margin: 0;">鑑定結果</h3>
+                </div>
+                
+                <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
+                    <div class="wireframe-card" style="padding: 30px;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #667eea; font-size: 28px; margin-bottom: 10px;">
+                                九星気学による総合鑑定
+                            </h1>
+                            <p style="color: #718096;">鑑定日: 2025年6月3日</p>
+                        </div>
+                        
+                        <div style="border-top: 2px solid #e2e8f0; padding-top: 20px; margin-bottom: 30px;">
+                            <h2 style="color: #2d3748; margin-bottom: 15px;">基本情報</h2>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: #4a5568;">
+                                <div>お名前: 山田太郎 様</div>
+                                <div>生年月日: 1990年1月1日</div>
+                                <div>本命星: 一白水星</div>
+                                <div>月命星: 九紫火星</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #2d3748; margin-bottom: 15px;">総合運勢</h2>
+                            <p style="line-height: 1.8; color: #4a5568;">
+                                あなたは一白水星生まれで、水の性質を持っています。
+                                柔軟性があり、どんな環境にも適応できる能力をお持ちです。
+                                2025年は変化の年となりそうです。新しいチャンスが次々と訪れるでしょう...
+                            </p>
+                        </div>
+                        
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #2d3748; margin-bottom: 15px;">仕事運</h2>
+                            <p style="line-height: 1.8; color: #4a5568;">
+                                転職をお考えとのことですが、今年の後半は特に良い時期となりそうです。
+                                特に7月から9月にかけては、あなたの能力を正当に評価してくれる
+                                出会いがありそうです...
+                            </p>
+                        </div>
+                        
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #2d3748; margin-bottom: 15px;">開運アドバイス</h2>
+                            <ul style="line-height: 1.8; color: #4a5568;">
+                                <li>ラッキーカラー: 青、黒</li>
+                                <li>ラッキー方位: 北、東北</li>
+                                <li>開運アイテム: 水晶、観葉植物</li>
+                                <li>注意すべき月: 3月、11月</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 40px;">
+                            <button class="wireframe-button" style="font-size: 16px; padding: 12px 24px;">
+                                📄 PDFでダウンロード
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="#" style="color: #667eea;">← 鑑定履歴に戻る</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. 管理者ダッシュボード -->
+        <div id="admin-dashboard" class="screen-section">
+            <h2 class="screen-title">9. 管理者ダッシュボード</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/admin</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>管理者権限必要</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">権限</div>
+                    <div>super_admin, admin</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header" style="background: #2d3748;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0;">管理者ダッシュボード</h3>
+                        <div style="display: flex; gap: 20px; align-items: center;">
+                            <span>👤 管理者: admin@example.com</span>
+                            <button style="background: white; color: #2d3748; padding: 5px 15px; border-radius: 4px;">
+                                ログアウト
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <h2 style="margin-bottom: 20px;">システム状況</h2>
+                    
+                    <div class="wireframe-grid">
+                        <div class="wireframe-card" style="text-align: center;">
+                            <h3 style="color: #718096; font-size: 16px; margin-bottom: 10px;">総ユーザー数</h3>
+                            <div style="font-size: 36px; color: #2d3748; font-weight: bold;">1,234</div>
+                            <div style="color: #48bb78; font-size: 14px;">+12% 前月比</div>
+                        </div>
+                        
+                        <div class="wireframe-card" style="text-align: center;">
+                            <h3 style="color: #718096; font-size: 16px; margin-bottom: 10px;">本日の売上</h3>
+                            <div style="font-size: 36px; color: #2d3748; font-weight: bold;">¥45,600</div>
+                            <div style="color: #48bb78; font-size: 14px;">92クレジット</div>
+                        </div>
+                        
+                        <div class="wireframe-card" style="text-align: center;">
+                            <h3 style="color: #718096; font-size: 16px; margin-bottom: 10px;">未処理の鑑定</h3>
+                            <div style="font-size: 36px; color: #f59e0b; font-weight: bold;">8</div>
+                            <div style="color: #718096; font-size: 14px;">要確認</div>
+                        </div>
+                        
+                        <div class="wireframe-card" style="text-align: center;">
+                            <h3 style="color: #718096; font-size: 16px; margin-bottom: 10px;">今月の鑑定数</h3>
+                            <div style="font-size: 36px; color: #2d3748; font-weight: bold;">856</div>
+                            <div style="color: #48bb78; font-size: 14px;">+25% 前月比</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 40px;">
+                        <h3 style="margin-bottom: 20px;">管理メニュー</h3>
+                        <div class="wireframe-grid">
+                            <div class="wireframe-card" style="cursor: pointer;">
+                                <h4 style="color: #667eea; margin-bottom: 10px;">🔮 鑑定結果管理</h4>
+                                <p style="color: #718096; font-size: 14px;">
+                                    AI生成結果の確認・編集・承認
+                                </p>
+                            </div>
+                            
+                            <div class="wireframe-card" style="cursor: pointer;">
+                                <h4 style="color: #667eea; margin-bottom: 10px;">👥 ユーザー管理</h4>
+                                <p style="color: #718096; font-size: 14px;">
+                                    ユーザー情報の確認・編集
+                                </p>
+                            </div>
+                            
+                            <div class="wireframe-card" style="cursor: pointer;">
+                                <h4 style="color: #667eea; margin-bottom: 10px;">📊 売上レポート</h4>
+                                <p style="color: #718096; font-size: 14px;">
+                                    日次・月次の売上分析
+                                </p>
+                            </div>
+                            
+                            <div class="wireframe-card" style="cursor: pointer;">
+                                <h4 style="color: #667eea; margin-bottom: 10px;">⚙️ システム設定</h4>
+                                <p style="color: #718096; font-size: 14px;">
+                                    占い種別・料金設定
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. 鑑定結果管理画面 -->
+        <div id="admin-fortune" class="screen-section">
+            <h2 class="screen-title">10. 鑑定結果管理画面（管理者用）</h2>
+            
+            <div class="screen-info">
+                <div class="info-item">
+                    <div class="info-label">URL</div>
+                    <div>/admin/fortunes</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">認証</div>
+                    <div>管理者権限必要</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">主要機能</div>
+                    <div>AI結果の編集・承認</div>
+                </div>
+            </div>
+            
+            <div class="wireframe">
+                <div class="wireframe-header" style="background: #2d3748;">
+                    <h3 style="margin: 0;">鑑定結果管理</h3>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>AI生成結果一覧</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <select class="wireframe-input" style="width: 150px;">
+                                <option>すべて</option>
+                                <option>未確認</option>
+                                <option>編集中</option>
+                                <option>承認済み</option>
+                            </select>
+                            <input type="text" class="wireframe-input" placeholder="ユーザー名で検索" style="width: 200px;">
+                        </div>
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f7fafc;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0;">申込日時</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0;">ユーザー</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0;">占い種別</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0;">ステータス</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">2025/06/03 15:30</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">田中花子</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">タロット占い</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                    <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                                        AI生成完了
+                                    </span>
+                                </td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                    <button style="background: #667eea; color: white; padding: 6px 12px; border-radius: 4px; font-size: 14px;">
+                                        確認・編集
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">2025/06/03 14:15</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">佐藤次郎</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">九星気学</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                    <span style="background: #3182ce; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                                        編集中
+                                    </span>
+                                </td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                                    <button style="background: #48bb78; color: white; padding: 6px 12px; border-radius: 4px; font-size: 14px;">
+                                        編集を続ける
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- 編集モーダルの例 -->
+                    <div style="margin-top: 40px; border: 2px solid #667eea; border-radius: 8px; padding: 20px;">
+                        <h3 style="margin-bottom: 20px;">鑑定結果編集画面（モーダル表示）</h3>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <h4 style="margin-bottom: 10px; color: #4a5568;">AI生成結果</h4>
+                                <div style="background: #f7fafc; padding: 15px; border-radius: 4px; height: 300px; overflow-y: auto;">
+                                    <p style="line-height: 1.6; color: #718096;">
+                                        あなたは一白水星生まれで、水の性質を持っています...
+                                        （AI生成されたテキスト）
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 style="margin-bottom: 10px; color: #4a5568;">編集後</h4>
+                                <textarea style="width: 100%; height: 300px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 4px;">
+あなたは一白水星生まれで、水の性質を持っています...
+（編集可能なテキストエリア）
+                                </textarea>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                            <div>
+                                <button style="padding: 10px 20px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                                    一時保存
+                                </button>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button style="padding: 10px 20px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                                    キャンセル
+                                </button>
+                                <button style="background: #48bb78; color: white; padding: 10px 20px; border-radius: 4px;">
+                                    承認して公開
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>占い自動鑑定システム アーキテクチャ図</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+            background-color: #f5f7fa;
+            padding: 20px;
+            color: #2d3748;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .architecture-section {
+            padding: 40px;
+        }
+        
+        .layer {
+            margin-bottom: 30px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .layer-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        .components {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .component {
+            background-color: white;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .component:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+        
+        .component-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .component-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .component-desc {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        /* Layer specific colors */
+        .client-layer { background-color: #e3f2fd; }
+        .client-layer .component { border-color: #2196f3; }
+        
+        .app-layer { background-color: #f3e5f5; }
+        .app-layer .component { border-color: #9c27b0; }
+        
+        .api-layer { background-color: #e8f5e9; }
+        .api-layer .component { border-color: #4caf50; }
+        
+        .db-layer { background-color: #fff3e0; }
+        .db-layer .component { border-color: #ff9800; }
+        
+        .external-layer { background-color: #fce4ec; }
+        .external-layer .component { border-color: #e91e63; }
+        
+        .flow-diagram {
+            margin-top: 40px;
+            padding: 30px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .flow-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .flow-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .flow-step {
+            flex: 1;
+            min-width: 150px;
+            background-color: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #667eea;
+        }
+        
+        .flow-step:last-child::after {
+            display: none;
+        }
+        
+        .flow-number {
+            background-color: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+        }
+        
+        .tech-stack {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .tech-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .tech-category {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        
+        .tech-list {
+            list-style: none;
+        }
+        
+        .tech-list li {
+            padding: 5px 0;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .security-section {
+            margin-top: 40px;
+            padding: 30px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+        }
+        
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .security-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 2px solid #4caf50;
+        }
+        
+        .security-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .flow-step::after {
+                display: none;
+            }
+            
+            .flow-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>占い自動鑑定システム アーキテクチャ図（改訂版）</h1>
+            <p>Next.js 14 + Claude 3 Sonnet + Supabase + Bull Queue</p>
+        </div>
+        
+        <div class="architecture-section">
+            <!-- クライアント層 -->
+            <div class="layer client-layer">
+                <div class="layer-title">🌐 クライアント層</div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-icon">💻</div>
+                        <div class="component-name">Webブラウザ</div>
+                        <div class="component-desc">Chrome, Safari, Edge</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">📱</div>
+                        <div class="component-name">モバイルブラウザ</div>
+                        <div class="component-desc">iOS, Android対応</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">👨‍💼</div>
+                        <div class="component-name">管理者画面</div>
+                        <div class="component-desc">AI結果編集・承認</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- アプリケーション層 -->
+            <div class="layer app-layer">
+                <div class="layer-title">⚡ アプリケーション層 (Vercel Edge)</div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-icon">🎨</div>
+                        <div class="component-name">Next.js Pages</div>
+                        <div class="component-desc">SSR/SSG/ISR</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">🛡️</div>
+                        <div class="component-name">NextAuth.js</div>
+                        <div class="component-desc">認証・認可</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">🎯</div>
+                        <div class="component-name">React Components</div>
+                        <div class="component-desc">shadcn/ui使用</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">📄</div>
+                        <div class="component-name">PDF生成</div>
+                        <div class="component-desc">React PDF</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- API層 -->
+            <div class="layer api-layer">
+                <div class="layer-title">🔌 API層</div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-icon">🚀</div>
+                        <div class="component-name">tRPC</div>
+                        <div class="component-desc">型安全なAPI</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">🔧</div>
+                        <div class="component-name">API Routes</div>
+                        <div class="component-desc">RESTful API</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">🔄</div>
+                        <div class="component-name">Webhooks</div>
+                        <div class="component-desc">Stripe連携</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">⏰</div>
+                        <div class="component-name">Queue System</div>
+                        <div class="component-desc">Bull + Redis</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- データベース層 -->
+            <div class="layer db-layer">
+                <div class="layer-title">💾 データベース層 (Supabase)</div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-icon">🗄️</div>
+                        <div class="component-name">PostgreSQL</div>
+                        <div class="component-desc">メインDB</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">🔐</div>
+                        <div class="component-name">Prisma ORM</div>
+                        <div class="component-desc">型安全なDB操作</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">📁</div>
+                        <div class="component-name">File Storage</div>
+                        <div class="component-desc">PDF保存</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">🛡️</div>
+                        <div class="component-name">Row Level Security</div>
+                        <div class="component-desc">データ保護</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 外部サービス層 -->
+            <div class="layer external-layer">
+                <div class="layer-title">🌍 外部サービス層</div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-icon">🤖</div>
+                        <div class="component-name">Claude API</div>
+                        <div class="component-desc">AI占い生成</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">💳</div>
+                        <div class="component-name">Stripe</div>
+                        <div class="component-desc">決済処理</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">📧</div>
+                        <div class="component-name">Resend</div>
+                        <div class="component-desc">メール送信</div>
+                    </div>
+                    <div class="component">
+                        <div class="component-icon">📤</div>
+                        <div class="component-name">Uploadthing</div>
+                        <div class="component-desc">ファイルアップロード</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 処理フロー -->
+            <div class="flow-diagram">
+                <div class="flow-title">占い鑑定処理フロー</div>
+                <div class="flow-container">
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <strong>ユーザー入力</strong>
+                        <p>生年月日・相談内容</p>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <strong>Claude生成</strong>
+                        <p>AI占い文作成</p>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <strong>管理者編集</strong>
+                        <p>品質チェック・修正</p>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <strong>PDF生成</strong>
+                        <p>鑑定書作成</p>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">5</div>
+                        <strong>配信</strong>
+                        <p>ユーザーへ通知</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- セキュリティ -->
+            <div class="security-section">
+                <div class="flow-title">🔒 セキュリティ対策</div>
+                <div class="security-grid">
+                    <div class="security-item">
+                        <div class="security-icon">🔐</div>
+                        <strong>認証</strong>
+                        <p>JWT + NextAuth</p>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon">🛡️</div>
+                        <strong>暗号化</strong>
+                        <p>HTTPS/TLS 1.3</p>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon">🚫</div>
+                        <strong>攻撃対策</strong>
+                        <p>XSS/CSRF防御</p>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon">📊</div>
+                        <strong>監視</strong>
+                        <p>Sentry + Analytics</p>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon">⚡</div>
+                        <strong>レート制限</strong>
+                        <p>API保護</p>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon">💾</div>
+                        <strong>バックアップ</strong>
+                        <p>日次自動実行</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 技術スタック詳細 -->
+            <div class="tech-stack">
+                <div class="tech-card">
+                    <div class="tech-category">フロントエンド</div>
+                    <ul class="tech-list">
+                        <li>✓ Next.js 14 (App Router)</li>
+                        <li>✓ TypeScript 5.x</li>
+                        <li>✓ Tailwind CSS 3.x</li>
+                        <li>✓ shadcn/ui Components</li>
+                        <li>✓ React Hook Form</li>
+                    </ul>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-category">バックエンド</div>
+                    <ul class="tech-list">
+                        <li>✓ Next.js API Routes</li>
+                        <li>✓ Prisma ORM 5.x</li>
+                        <li>✓ tRPC 10.x</li>
+                        <li>✓ NextAuth.js 5.x</li>
+                        <li>✓ Zod Validation</li>
+                    </ul>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-category">インフラ・サービス</div>
+                    <ul class="tech-list">
+                        <li>✓ Vercel (Hosting)</li>
+                        <li>✓ Supabase (DB)</li>
+                        <li>✓ Claude 3 Sonnet</li>
+                        <li>✓ Stripe (Payment)</li>
+                        <li>✓ Resend (Email)</li>
+                    </ul>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-category">開発ツール</div>
+                    <ul class="tech-list">
+                        <li>✓ Git/GitHub</li>
+                        <li>✓ ESLint/Prettier</li>
+                        <li>✓ Vitest (Testing)</li>
+                        <li>✓ GitHub Actions</li>
+                        <li>✓ Vercel Analytics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
