@@ -1,0 +1,183 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザーテーブル
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  password_hash  String
+  name           String    @db.VarChar(100)
+  credits        Int       @default(0)
+  email_verified Boolean   @default(false)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  // Relations
+  fortune_requests    FortuneRequest[]
+  credit_transactions CreditTransaction[]
+  payment_history     PaymentHistory[]
+  audit_logs          AuditLog[]
+
+  @@map("users")
+}
+
+// 管理者テーブル
+model Admin {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password_hash String
+  name          String    @db.VarChar(100)
+  role          String    @db.VarChar(20) // super_admin, admin
+  created_at    DateTime  @default(now())
+
+  // Relations
+  edited_results AiResult[]
+  audit_logs     AuditLog[]
+
+  @@map("admins")
+}
+
+// 占い種別マスタ
+model FortuneType {
+  id               String    @id @default(uuid())
+  name             String    @unique @db.VarChar(50)
+  description      String?
+  required_credits Int
+  input_schema     Json
+  is_active        Boolean   @default(true)
+  created_at       DateTime  @default(now())
+
+  // Relations
+  fortune_requests FortuneRequest[]
+
+  @@map("fortune_types")
+}
+
+// 占い申込
+model FortuneRequest {
+  id              String    @id @default(uuid())
+  user_id         String
+  fortune_type_id String
+  input_data      Json
+  status          String    @default("pending") @db.VarChar(20)
+  created_at      DateTime  @default(now())
+
+  // Relations
+  user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  fortune_type  FortuneType   @relation(fields: [fortune_type_id], references: [id])
+  ai_result     AiResult?
+  fortune_result FortuneResult?
+
+  @@index([user_id])
+  @@index([fortune_type_id])
+  @@index([status])
+  @@index([created_at(sort: Desc)])
+  @@index([user_id, status])
+  @@map("fortune_requests")
+}
+
+// AI生成結果
+model AiResult {
+  id             String    @id @default(uuid())
+  request_id     String    @unique
+  prompt         String    @db.Text
+  raw_result     String    @db.Text
+  edited_result  String?   @db.Text
+  editor_id      String?
+  approved_at    DateTime?
+  created_at     DateTime  @default(now())
+
+  // Relations
+  request FortuneRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  editor  Admin?         @relation(fields: [editor_id], references: [id], onDelete: SetNull)
+
+  @@index([editor_id])
+  @@index([approved_at])
+  @@map("ai_results")
+}
+
+// 最終鑑定結果
+model FortuneResult {
+  id            String   @id @default(uuid())
+  request_id    String   @unique
+  final_content String   @db.Text
+  pdf_url       String?  @db.VarChar(500)
+  published_at  DateTime @default(now())
+  created_at    DateTime @default(now())
+
+  // Relations
+  request FortuneRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@index([published_at(sort: Desc)])
+  @@map("fortune_results")
+}
+
+// クレジット取引
+model CreditTransaction {
+  id          String   @id @default(uuid())
+  user_id     String
+  amount      Int      // 正: 追加, 負: 使用
+  type        String   @db.VarChar(20) // purchase, usage, bonus, refund
+  description String?  @db.VarChar(255)
+  created_at  DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([type])
+  @@index([created_at(sort: Desc)])
+  @@index([user_id, created_at(sort: Desc)])
+  @@map("credit_transactions")
+}
+
+// 決済履歴
+model PaymentHistory {
+  id                String   @id @default(uuid())
+  user_id           String
+  stripe_payment_id String   @unique @db.VarChar(255)
+  amount_jpy        Int
+  credits_purchased Int
+  status            String   @db.VarChar(20) // succeeded, failed, refunded
+  created_at        DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([status])
+  @@index([created_at(sort: Desc)])
+  @@map("payment_history")
+}
+
+// 監査ログ
+model AuditLog {
+  id         String   @id @default(uuid())
+  table_name String   @db.VarChar(50)
+  action     String   @db.VarChar(20) // INSERT, UPDATE, DELETE, LOGIN, LOGOUT
+  user_id    String?
+  admin_id   String?
+  changes    Json?
+  ip_address String?  @db.VarChar(45)
+  created_at DateTime @default(now())
+
+  // Relations
+  user  User?  @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  admin Admin? @relation(fields: [admin_id], references: [id], onDelete: SetNull)
+
+  @@index([table_name])
+  @@index([action])
+  @@index([user_id])
+  @@index([admin_id])
+  @@index([created_at(sort: Desc)])
+  @@map("audit_logs")
+}
