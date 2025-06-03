@@ -3,17 +3,14 @@ import { type NextRequest } from 'next/server'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
 import { db } from '@/server/db'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/lib/auth'
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  const session = await auth()
+  
   return {
     db,
-    user,
+    user: session?.user,
     ...opts,
   }
 }
