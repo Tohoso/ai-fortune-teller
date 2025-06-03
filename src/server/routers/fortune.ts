@@ -149,7 +149,23 @@ export const fortuneRouter = createTRPCRouter({
         return fortuneRequest
       })
 
-      // TODO: ここでキューにジョブを追加（後で実装）
+      // AI生成ジョブをキューに追加
+      const { addFortuneGenerationJob } = await import("@/lib/queue/fortune-queue")
+      
+      await addFortuneGenerationJob({
+        fortuneRequestId: result.id,
+        fortuneType: fortuneType.name,
+        inputData: {
+          fortuneType: fortuneType.name,
+          name: inputData.name,
+          birthdate: inputData.birthdate,
+          birthtime: inputData.birthtime,
+          birthplace: inputData.birthplace,
+          gender: inputData.gender,
+          consultation: inputData.consultation,
+          questionType: inputData.question_type,
+        }
+      })
       
       return result
     })
